@@ -42,3 +42,4 @@ OBS: Para sair do ambiente virtual rode o seguinte comenado no terminal:
 ```bash
 deactivate
 ```
+
