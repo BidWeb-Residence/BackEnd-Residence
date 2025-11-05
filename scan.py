@@ -27,14 +27,14 @@ async def scan_sql(payload: ScanPayload):
        raise HTTPException(status_code=400, detail="URL inválida ou não permitida.")
     # Em um ambiente controlado, USAR: target_url_para_scanner = target_url
     #teste:
-    # target_url_para_scanner = "http://testphp.vulnweb.com/listproducts.php?cat=1"
-    return {"url_recebida": target_url}
+    
+   # return {"url_recebida": target_url}
 
+target_url_para_scanner = "http://testphp.vulnweb.com/listproducts.php?cat=1"
 command = [
     "sqlmap",
     "-u",
-    # target_url_para_scanner,
-    "http://testphp.vulnweb.com/listproducts.php?cat=1",
+    target_url_para_scanner,
     "--dbs"
     "--batch",
     "--risk=1"
@@ -62,31 +62,4 @@ except Exception as e:
 
     
 
-# problema para resolver: definir o target_url_para_scanner dentro do escopo command
-# encaixar o Dict e o Any
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# APP.POST ANTIGO
-# def scan_sql():
-
-#     data = request.get_json()
-#     if not data or "url" not in data:
-#         return jsonify({"error": "O corpo da requisição deve conter a chave 'url'."}), 400
-#     target_url = data["url"].strip()
-#     if not is_valid_url(target_url):
-#         return jsonify({"error": "URL inválida ou não permitida."}), 400
-#     print(target_url)
-#     return jsonify({"url_recebida": target_url})
+# falta encaixar o Dict e o Any
