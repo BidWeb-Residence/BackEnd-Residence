@@ -30,9 +30,11 @@ source venv/bin/activate
 # 3. Instalar dependências
 pip install -r requirements.txt
 
+sudo apt-get update && sudo apt-get install -y sqlmap
 
 # 4. Rodar aplicação
 uvicorn scan:app --reload --host 0.0.0.0 --port 8000
+
 ```
 
 OBS: Para sair do ambiente virtual rode o seguinte comenado no terminal:

@@ -15,22 +15,20 @@ app = FastAPI(
 
 @app.get("/")
 async def welcome_api():
-    print(SQLMAP_SCRIPT)
     return {"message": "Welcome to SQL Injection Tester"}
 
-@app.post("/scan/sql")
-async def scan_sql(payload: ScanPayload) -> Dict[str, Any]:
+@app.post("/scan/sql", response_model=None)
+async def scan_sql(payload: ScanPayload) -> dict[str, any]:
     target_url = payload.url.strip()
 
-    if not is_valid_url(target_url):
+    if not is_valid_url(target_url):            
        raise HTTPException(status_code=400, detail="URL inválida ou não permitida.")
     # Em um ambiente controlado, USAR: target_url_para_scanner = target_url
     #teste:
         # return {"url_recebida": target_url}
 
-        output = result.stdout.strip()
-        error = result.stderr.strip()
-
+    output = result.stdout.strip()
+    error = result.stderr.strip()
 
 try: 
     result = subprocess.run(
