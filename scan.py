@@ -2,10 +2,8 @@ from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 import subprocess 
 from validators import is_valid_url 
-# from typing import Dict, Any
-
-def is_valid_url(url: str) -> bool:
-    return url.startswith("http") or url.startswith("https")
+from sqlmap import command, target_url_para_scanner
+# from typing import Dict, Any (opcional!!)
 
 class ScanPayload(BaseModel):
     url: str
@@ -27,8 +25,7 @@ async def scan_sql(payload: ScanPayload):
        raise HTTPException(status_code=400, detail="URL inválida ou não permitida.")
     # Em um ambiente controlado, USAR: target_url_para_scanner = target_url
     #teste:
-    
-   # return {"url_recebida": target_url}
+        # return {"url_recebida": target_url}
 
 target_url_para_scanner = "http://testphp.vulnweb.com/listproducts.php?cat=1"
 command = [
@@ -40,6 +37,7 @@ command = [
     "--risk=1"
 ]
 
+
 try: 
     result = subprocess.run(
         command, 
@@ -48,11 +46,12 @@ try:
         timeout=300,
         check =False 
     )
+    
     #Processando resultado
     if result.returncode != 0:
         print(f"Erro ao executar o comando sqlmap: {result.stderr}", 500)
-
-
+        
+        
     raw_output = result.stdout
     print(raw_output)
 except subprocess.TimeoutExpired:
@@ -62,4 +61,7 @@ except Exception as e:
 
     
 
-# falta encaixar o Dict e o Any
+# # falta encaixar o Dict e o Any
+
+# def is_valid_url(url: str) -> bool:
+#     return url.startswith("http") or url.startswith("https")
