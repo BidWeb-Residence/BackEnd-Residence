@@ -9,33 +9,27 @@ class ScanPayload(BaseModel):
     url: str
 
 app = FastAPI(
-    title = "SQL Injection  API",
-    description = "API para receber URLS para análise"
+    title="SQL Injection API",
+    description="API para receber URLs para análise de vulnerabilidades SQL Injection"
 )
- 
-@app.get("/")               
-async def welcomeAPI():
-    return "<p>Welcome to SQL Injection Tester</p>"
 
+@app.get("/")
+async def welcome_api():
+    print(SQLMAP_SCRIPT)
+    return {"message": "Welcome to SQL Injection Tester"}
 
 @app.post("/scan/sql")
-async def scan_sql(payload: ScanPayload):
+async def scan_sql(payload: ScanPayload) -> Dict[str, Any]:
     target_url = payload.url.strip()
+
     if not is_valid_url(target_url):
        raise HTTPException(status_code=400, detail="URL inválida ou não permitida.")
     # Em um ambiente controlado, USAR: target_url_para_scanner = target_url
     #teste:
         # return {"url_recebida": target_url}
 
-target_url_para_scanner = "http://testphp.vulnweb.com/listproducts.php?cat=1"
-command = [
-    "sqlmap",
-    "-u",
-    target_url_para_scanner,
-    "--dbs"
-    "--batch",
-    "--risk=1"
-]
+        output = result.stdout.strip()
+        error = result.stderr.strip()
 
 
 try: 
@@ -59,7 +53,6 @@ except subprocess.TimeoutExpired:
 except Exception as e:
     print(f"Ocorreu um erro ao executar o comando sqlmap: {e}", 500)
 
-    
 
 # # falta encaixar o Dict e o Any
 

@@ -1,40 +1,38 @@
-# BackEnd-Residence
+# 🔍 SQL Injection Scanner API
 
-Backend do projeto Residence, desenvolvido com **Flask**. Este projeto serve como API para gerenciar funcionalidades relacionadas ao Residence.
+API desenvolvida em **FastAPI** para detecção automatizada de vulnerabilidades de **SQL Injection**, integrada ao [`sqlmap`](https://sqlmap.org) — o scanner mais avançado da categoria.
 
----
-
-## 🔹 Pré-requisitos
-
-Antes de iniciar, certifique-se de ter instalado:
-
-- Python 3.10 ou superior
-- pip (gerenciador de pacotes do Python)
-- Ambiente virtual opcional (recomendado)
+> ✅ Projeto seguro para testes educacionais (alvos como `testphp.vulnweb.com`).
 
 ---
 
-## 🔹 Configuração do ambiente
+## 🛠 Pré-requisitos
 
-1. Crie e ative o ambiente virtual:
+- [Python 3.9+](https://www.python.org/downloads/)
+- [Git](https://git-scm.com/downloads)
 
-```bash
-# Windows
-.venv\Scripts\activate
-# Linux / macOS
-source .venv/bin/activate
-```
+---
 
-2. Instale as dependências
+## 🚀 Instalação
 
 ```bash
+# 1. Criar ambiente virtual
+python -m venv venv
+
+# 2. Ativar ambiente (escolha conforme seu sistema)
+# Windows (PowerShell):
+venv\Scripts\Activate.ps1
+# Windows (CMD):
+venv\Scripts\activate.bat
+# Linux / macOS:
+source venv/bin/activate
+
+# 3. Instalar dependências
 pip install -r requirements.txt
-```
 
-3. Inicialize o servidor
 
-```bash
-python -m flask --app scan run
+# 4. Rodar aplicação
+uvicorn scan:app --reload --host 0.0.0.0 --port 8000
 ```
 
 OBS: Para sair do ambiente virtual rode o seguinte comenado no terminal:
@@ -42,4 +40,3 @@ OBS: Para sair do ambiente virtual rode o seguinte comenado no terminal:
 ```bash
 deactivate
 ```
-
