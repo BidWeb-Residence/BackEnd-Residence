@@ -42,3 +42,5 @@ OBS: Para sair do ambiente virtual rode o seguinte comenado no terminal:
 ```bash
 deactivate
 ```
+# 5. Comando de ataque com sqlmap
+python sqlmap.py -u "url" --batch --banner

@@ -1,8 +1,6 @@
 from fastapi import FastAPI, HTTPException, Response, status
 from pydantic import BaseModel
 import subprocess
-import re
-import shlex # Para tratamento seguro de strings de comando (embora menos essencial aqui)
 from typing import Dict, Any # Usado no retorno para clareza
 
 # === IMPORTAÇÕES DE TERCEIROS (Assumindo que 'validators' é um ficheiro local) ===

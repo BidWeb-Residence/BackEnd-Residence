@@ -2,12 +2,15 @@ import subprocess
 
 target_url_para_scanner = "http://testphp.vulnweb.com/listproducts.php?cat=1"
 command = [
+    # a ordem DEVE ser respeitada
     "sqlmap",
     "-u",
     target_url_para_scanner,
-    "--dbs"
     "--batch",
-    "--risk=1"
+    "--level=3",
+    "--risk=2",
+    "--dbs"
+    
 ]
 
 try: 
