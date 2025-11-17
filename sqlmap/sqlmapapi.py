@@ -74,7 +74,7 @@ from lib.utils.api import client
 from lib.utils.api import server
 
 try:
-    from sqlmap import modulePath
+    from sqlmap_runner import modulePath
 except ImportError:
     def modulePath():
         return getUnicode(os.path.dirname(os.path.realpath(__file__)), encoding=sys.getfilesystemencoding() or UNICODE_ENCODING)
