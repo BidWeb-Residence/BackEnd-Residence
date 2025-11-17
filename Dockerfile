@@ -22,4 +22,5 @@ COPY . .
 EXPOSE 8000
 
 # 8. Rodar o servidor
-CMD ["uvicorn", "scan:app", "--host", "0.0.0.0", "--port", "$PORT"]
+ENTRYPOINT ["uvicorn", "scan:app", "--host", "0.0.0.0"]
+CMD ["--port", "8000"]
