@@ -1,24 +1,26 @@
-# 1 Imagem base do Python
+# 1. Imagem base
 FROM python:3.11-slim
 
-# 2. Pasta de trabalho dentro do contêiner
+# 2. Diretório de trabalho
 WORKDIR /app
 
-# 3. ATUALIZAR O LINUX E INSTALAR O SQLMAP
-# Esta é a etapa que adiciona a ferramenta do Kali ao seu ambiente
+# 3. Update e instalar sqlmap
 RUN apt-get update && \
     apt-get install -y sqlmap && \
     rm -rf /var/lib/apt/lists/*
 
-# 4. Copie o seu ficheiro de dependências Python
+# 4. Copiar dependências
 COPY requirements.txt .
 
-# 5. Instale as dependências do Python (FastAPI, Uvicorn)
+# 5. Instalar dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Copie todo o resto do seu código (ex: scan.py)
+# 6. Copiar código da aplicação
 COPY . .
 
-# 7. Comando para executar o seu servidor FastAPI na porta 8080
-# O Back4App exige que a sua aplicação ouça na porta 8080
-CMD ["uvicorn", "scan:app", "--host", "0.0.0.0", "--port", "8080"]
+# 7. Expor porta (opcional mas recomendado)
+EXPOSE 8000
+
+# 8. Rodar o servidor
+ENTRYPOINT ["uvicorn", "scan:app", "--host", "0.0.0.0"]
+CMD ["--port", "8000"]
