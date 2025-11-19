@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import subprocess
 from typing import Dict, Any
@@ -18,6 +19,13 @@ app = FastAPI(
     description="API para receber URLs para análise de vulnerabilidades SQL Injection"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/")
 async def welcome_api():
     print(SQLMAP_SCRIPT)
@@ -87,4 +95,3 @@ def parse_databases_from_output(output: str) -> list:
             if db_name and not db_name.startswith(("starting", "ending", "legal", "https")):
                 databases.append(db_name)
     return databases
-

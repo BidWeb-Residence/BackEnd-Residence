@@ -9,7 +9,7 @@ command = [
     "--batch",
     "--level=3",
     "--risk=2",
-    "--dbs"
+    "--dbs" #listar
     
 ]
 

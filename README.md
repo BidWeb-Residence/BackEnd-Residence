@@ -44,4 +44,4 @@ deactivate
 ```
 
 # 5. Comando de ataque com sqlmap
-python sqlmap.py -u "url" --batch --banner
+python sqlmap_runner.py -u "url" --batch --banner
