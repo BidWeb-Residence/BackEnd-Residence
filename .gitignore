@@ -6,3 +6,6 @@ ENV/
 output/
 .sqlmap/
 *.log
+
+.trash/
+trash/
