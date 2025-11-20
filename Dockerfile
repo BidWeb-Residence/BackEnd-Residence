@@ -18,9 +18,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 6. Copiar código da aplicação
 COPY . .
 
-# 7. Expor porta (opcional mas recomendado)
+# 7. “Dentro do container, tudo será executado no diretório /app
+ENV PYTHONPATH="/app"
+
+# 8. Expor porta (opcional mas recomendado)
 EXPOSE 8000
 
-# 8. Rodar o servidor
-ENTRYPOINT ["uvicorn", "scan:app", "--host", "0.0.0.0"]
+# 9. Rodar o servidor
+ENTRYPOINT ["uvicorn", "main:app", "--host", "0.0.0.0"]
 CMD ["--port", "8000"]

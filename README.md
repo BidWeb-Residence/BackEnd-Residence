@@ -33,7 +33,7 @@ pip install -r requirements.txt
 sudo apt-get update && sudo apt-get install -y sqlmap
 
 # 4. Rodar aplicação
-uvicorn scan:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ```
 
@@ -43,5 +43,5 @@ OBS: Para sair do ambiente virtual rode o seguinte comenado no terminal:
 deactivate
 ```
 
-# 5. Comando de ataque com sqlmap
-python sqlmap.py -u "url" --batch --banner
+# 5. Comando de uso do sqlmap
+python -m core.runner
