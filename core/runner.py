@@ -5,6 +5,7 @@ from typing import Dict, List
 
 
 def run_sqlmap(url: str) -> dict:
+    # Monta o comando sqlmap
     command = [
         "sqlmap",
         "-u", url,
@@ -16,13 +17,13 @@ def run_sqlmap(url: str) -> dict:
         "--timeout=30",
         "--flush-session"
     ]
-
+   
     result = subprocess.run(
         command,
         text=True,
         capture_output=True
     )
-
+    
     stdout = result.stdout or ""
     stderr = result.stderr or ""
     returncode = result.returncode
@@ -44,13 +45,13 @@ def run_sqlmap(url: str) -> dict:
         "parsed": parsed
     }
 
-
+# Teste rápido via CLI
 if __name__ == "__main__":
     import sys
     test_url = "http://testphp.vulnweb.com/listproducts.php?cat=1"
     if len(sys.argv) > 1:
         test_url = sys.argv[1]
-
+    # Executa o sqlmap
     res = run_sqlmap(test_url)
 
     print("\n=== RETURN ===")

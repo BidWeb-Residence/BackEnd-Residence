@@ -41,6 +41,7 @@ def format_output(parsed: dict):
     print("ERRORS / WARNINGS")
     print("============================================================")
 
+    
     errors = parsed.get("errors", [])
     if not errors:
         print("Nenhum erro encontrado.")
