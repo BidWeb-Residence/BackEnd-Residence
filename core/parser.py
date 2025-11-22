@@ -4,12 +4,9 @@ from typing import Dict, List
 
 
 def _extract_injection_points(output: str) -> List[Dict]:
-    """
-    Extrai todos os blocos de injeção com Type, Title e Payload.
-    Retorna lista de dicts: {type, title, payload}
-    """
+ 
     findings = []
-    # Regex tenta capturar sequências de Type -> Title -> Payload
+    
     pattern = re.compile(
         r"Type:\s*(.+?)\s*\n\s*Title:\s*(.+?)\s*\n\s*Payload:\s*(.+?)(?=\n\s*\n|\n---|\Z)",
         re.IGNORECASE | re.DOTALL,
@@ -24,13 +21,9 @@ def _extract_injection_points(output: str) -> List[Dict]:
 
 
 def _extract_databases(output: str) -> List[str]:
-    """
-    Extrai nomes de bancos de dados a partir do bloco 'available databases'.
-    Se não encontrar o bloco, tenta capturar linhas '[*] <nome>'.
-    Filtra linhas de 'starting' e 'ending'.
-    """
+
     dbs = []
-    # Primeiro tenta capturar bloco específico
+    
     block_match = re.search(r"available databases\s*\[\d+\]:\s*(.*?)(?:\n\n|\Z)", output, re.IGNORECASE | re.DOTALL)
     if block_match:
         block = block_match.group(1)
