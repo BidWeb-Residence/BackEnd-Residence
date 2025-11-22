@@ -28,9 +28,6 @@ def run_sqlmap(url: str):
     parsed["stdout"] = result.stdout
     parsed["stderr"] = result.stderr
 
-    # Formatação no terminal
-    format_output(parsed)
-
     return parsed
 
 

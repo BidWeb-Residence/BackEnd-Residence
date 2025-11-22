@@ -54,8 +54,12 @@ async def scan_url(data: ScanRequest):
 
     # retorno para o frontend
     return {
-        "status": "success",
-        "target_url": url,
-        "output": result["stdout"],
-        "databases": result.get("databases", [])
+    "status": "success",
+    "target_url": url,
+    "data": {
+    "dbms": result.get("dbms"),
+    "injection_points": result.get("injection_points", []),
+    "databases": result.get("databases", [])
+    
+}
     }

@@ -12,40 +12,23 @@ def print_key_value(key, value, color=Fore.GREEN):
     else:
         print(f"{Fore.RED}{key}: {Style.RESET_ALL}None")
 
-def format_output(parsed: dict):
-    # ------------------------
-    # TARGET SECTION
-    # ------------------------
-    print_section("TARGET INFO")
-    t = parsed["target"]
-    print_key_value("URL", t["url"])
-    print_key_value("OS", t["os"])
-    print_key_value("Technology", t["technology"])
-    print_key_value("DBMS", t["dbms"])
+def format_output(parsed):
+    print("=== SQLMAP RESULT ===")
 
-    # ------------------------
-    # DATABASES
-    # ------------------------
-    print_section("DATABASES ENUMERATED")
-    if parsed["databases"]:
-        for db in parsed["databases"]:
-            print(f" - {Fore.GREEN}{db}")
-    else:
-        print(f"{Fore.RED}Nenhum banco encontrado.")
+    print(f"Target: {parsed['target']}")
+    print(f"DBMS: {parsed['dbms']}")
 
-    # ------------------------
-    # VULNERABILITIES
-    # ------------------------
-    print_section("VULNERABILITIES")
+    print("\n--- Injection Points ---")
+    for inj in parsed["injection_points"]:
+        print(f"Type: {inj['type']}")
+        print(f"Payload: {inj['payload']}\n")
 
-    vulns = parsed["vulnerabilities"]
-    for vtype, info in vulns.items():
-        print(f"\n{Fore.MAGENTA}>>> {vtype.upper()} <<<")
+    print("\n--- Databases ---")
+    for db in parsed["databases"]:
+        print(f"- {db}")
 
-        if not info:
-            print(f"{Fore.RED}Nenhuma vulnerabilidade detectada.")
-            continue
-
-        print(f"{Fore.YELLOW}Title:{Style.RESET_ALL}  {info['title']}")
-        print(f"{Fore.YELLOW}Payload:{Style.RESET_ALL} {info['payload']}")
-        print(f"{Fore.CYAN}{'-' * 60}{Style.RESET_ALL}")
+    print("\n--- Errors ---")
+    for err in parsed["errors"]:
+        print(f"* {err}")
+        
+# não sendo usado no momento

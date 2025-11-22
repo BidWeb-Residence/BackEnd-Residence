@@ -3,18 +3,19 @@ import re
 def parse_sqlmap_output(output: str, url: str) -> dict:
     parsed = {
         "target": {
-            "os": [],
-            "technology": [],
-            "dbms": [],
+            "os": None,
+            "technology": None,
+            "dbms": None,
             "url": url
         },
         "databases": [],
         "vulnerabilities": {
-            "boolean_based": [],
-            "error_based": [],
-            "time_based": [],
-            "union_based": []
-        }
+            "boolean_based": None,
+            "error_based": None,
+            "time_based": None,
+            "union_based": None
+        },
+        "raw_output": output
     }
 
     # ------------------------------- OS -------------------------------
@@ -37,24 +38,16 @@ def parse_sqlmap_output(output: str, url: str) -> dict:
     parsed["databases"] = db_matches or []
 
     # ------------------------------- VULNERABILIDADES -------------------------------
-    vuln_blocks = {
-        "boolean_based": r"(Type: boolean-based blind[\s\S]*?)(?=Type:|\Z)",
-        "error_based":   r"(Type: error-based[\s\S]*?)(?=Type:|\Z)",
-        "time_based":    r"(Type: time-based blind[\s\S]*?)(?=Type:|\Z)",
-        "union_based":   r"(Type: UNION query[\s\S]*?)(?=Type:|\Z)"
+    vuln_patterns = {
+        "boolean_based": r"Type: boolean-based blind[\s\S]*?Payload: (.+)",
+        "error_based":   r"Type: error-based[\s\S]*?Payload: (.+)",
+        "time_based":    r"Type: time-based blind[\s\S]*?Payload: (.+)",
+        "union_based":   r"Type: UNION query[\s\S]*?Payload: (.+)"
     }
 
-    for key, pattern in vuln_blocks.items():
-        block = re.search(pattern, output)
-        if block:
-            text = block.group(1)
-
-            title = re.search(r"Title:\s*(.+)", text)
-            payload = re.search(r"Payload:\s*(.+)", text)
-
-            parsed["vulnerabilities"][key] = {
-                "title": title.group(1).strip() if title else None,
-                "payload": payload.group(1).strip() if payload else None
-            }
+    for key, pattern in vuln_patterns.items():
+        match = re.search(pattern, output)
+        if match:
+            parsed["vulnerabilities"][key] = match.group(1).strip()
 
     return parsed
