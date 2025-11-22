@@ -4,7 +4,6 @@ import subprocess
 
 def run_sqlmap(url: str):
     command = [
-    
         "sqlmap",
         "-u", url,
         "--dbs",
@@ -21,9 +20,15 @@ def run_sqlmap(url: str):
         capture_output=True
     )
 
+    # Parse do stdout
     parsed = parse_sqlmap_output(result.stdout, url)
 
-    # FORMATA A SAÍDA!!!
+    # Adiciona informações do processo
+    parsed["returncode"] = result.returncode
+    parsed["stdout"] = result.stdout
+    parsed["stderr"] = result.stderr
+
+    # Formatação no terminal
     format_output(parsed)
 
     return parsed
