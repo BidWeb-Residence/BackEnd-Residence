@@ -1,4 +1,3 @@
-# core/parser.py
 import re
 from typing import Dict, List
 
@@ -35,11 +34,13 @@ def _extract_databases(output: str) -> List[str]:
                 if not re.match(r"(starting|ending|fetched data)", name, re.IGNORECASE):
                     dbs.append(name)
     else:
+        
         # Fallback: pega todas as linhas [*] <nome> e filtra
         all_matches = re.findall(r"\[\*\]\s*([A-Za-z0-9_\-]+)", output)
         for name in all_matches:
             if not re.match(r"(starting|ending|fetched|your sqlmap version)", name, re.IGNORECASE):
                 dbs.append(name)
+                
     # remove duplicados mantendo ordem
     seen = set()
     res = []
@@ -54,6 +55,7 @@ def _extract_dbms(output: str) -> str:
     m = re.search(r"back-end DBMS[:\s]*([^\n]+)", output, re.IGNORECASE)
     if m:
         return m.group(1).strip()
+    
     # fallback: procurar "the back-end DBMS is <name>"
     m2 = re.search(r"the back-end DBMS is\s*([^\n]+)", output, re.IGNORECASE)
     if m2:

@@ -1,7 +1,8 @@
-# core/runner.py
 from core.parser import parse_sqlmap_output
 from core.formatter import format_output
 import subprocess
+from typing import Dict, List
+
 
 def run_sqlmap(url: str) -> dict:
     command = [
@@ -9,7 +10,8 @@ def run_sqlmap(url: str) -> dict:
         "-u", url,
         "--dbs",
         "--batch",
-        "--risk=2",
+        "--risk=3",
+        "--level=3",
         "--threads=2",
         "--timeout=30",
         "--flush-session"
@@ -25,17 +27,16 @@ def run_sqlmap(url: str) -> dict:
     stderr = result.stderr or ""
     returncode = result.returncode
 
-    # Parse sempre (pode estar vazio)
+    # Parse do stdout
     parsed = parse_sqlmap_output(stdout, url)
 
-    # Formata no terminal (somente para logging; safe)
-    try:
+    # Log seguro no terminal
+    if isinstance(parsed, dict):
         format_output(parsed)
-    except Exception:
-        # Não deixar a formatação quebrar o retorno principal
-        pass
+    else:
+        print("Erro: sqlmap retornou um formato inesperado.")
 
-    # Monta retorno consistente para a API
+    # Retorno completo para API ou CLI
     return {
         "returncode": returncode,
         "stdout": stdout,
@@ -49,7 +50,9 @@ if __name__ == "__main__":
     test_url = "http://testphp.vulnweb.com/listproducts.php?cat=1"
     if len(sys.argv) > 1:
         test_url = sys.argv[1]
+
     res = run_sqlmap(test_url)
+
     print("\n=== RETURN ===")
     print(f"returncode: {res['returncode']}")
     print(f"databases: {res['parsed'].get('databases')}")
