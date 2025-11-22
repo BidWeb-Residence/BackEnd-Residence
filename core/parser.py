@@ -1,6 +1,95 @@
+# core/parser.py
 import re
+from typing import Dict, List
 
-def parse_sqlmap_output(output: str, url: str) -> dict:
+
+def _extract_injection_points(output: str) -> List[Dict]:
+    """
+    Extrai todos os blocos de injeção com Type, Title e Payload.
+    Retorna lista de dicts: {type, title, payload}
+    """
+    findings = []
+    # Regex tenta capturar sequências de Type -> Title -> Payload
+    pattern = re.compile(
+        r"Type:\s*(.+?)\s*\n\s*Title:\s*(.+?)\s*\n\s*Payload:\s*(.+?)(?=\n\s*\n|\n---|\Z)",
+        re.IGNORECASE | re.DOTALL,
+    )
+
+    for m in pattern.finditer(output):
+        t = m.group(1).strip()
+        title = m.group(2).strip()
+        payload = m.group(3).strip()
+        findings.append({"type": t, "title": title, "payload": payload})
+    return findings
+
+
+def _extract_databases(output: str) -> List[str]:
+    """
+    Extrai nomes de bancos de dados a partir do bloco 'available databases'.
+    Se não encontrar o bloco, tenta capturar linhas '[*] <nome>'.
+    Filtra linhas de 'starting' e 'ending'.
+    """
+    dbs = []
+    # Primeiro tenta capturar bloco específico
+    block_match = re.search(r"available databases\s*\[\d+\]:\s*(.*?)(?:\n\n|\Z)", output, re.IGNORECASE | re.DOTALL)
+    if block_match:
+        block = block_match.group(1)
+        lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+        for ln in lines:
+            m = re.match(r"\[\*\]\s*(.+)", ln)
+            if m:
+                name = m.group(1).strip()
+                if not re.match(r"(starting|ending|fetched data)", name, re.IGNORECASE):
+                    dbs.append(name)
+    else:
+        # Fallback: pega todas as linhas [*] <nome> e filtra
+        all_matches = re.findall(r"\[\*\]\s*([A-Za-z0-9_\-]+)", output)
+        for name in all_matches:
+            if not re.match(r"(starting|ending|fetched|your sqlmap version)", name, re.IGNORECASE):
+                dbs.append(name)
+    # remove duplicados mantendo ordem
+    seen = set()
+    res = []
+    for d in dbs:
+        if d not in seen:
+            seen.add(d)
+            res.append(d)
+    return res
+
+
+def _extract_dbms(output: str) -> str:
+    m = re.search(r"back-end DBMS[:\s]*([^\n]+)", output, re.IGNORECASE)
+    if m:
+        return m.group(1).strip()
+    # fallback: procurar "the back-end DBMS is <name>"
+    m2 = re.search(r"the back-end DBMS is\s*([^\n]+)", output, re.IGNORECASE)
+    if m2:
+        return m2.group(1).strip()
+    return None
+
+
+def _extract_os_and_tech(output: str) -> Dict[str, str]:
+    os_val = None
+    tech_val = None
+    m_os = re.search(r"web server operating system:\s*([^\n]+)", output, re.IGNORECASE)
+    if m_os:
+        os_val = m_os.group(1).strip()
+    m_tech = re.search(r"web application technology:\s*([^\n]+)", output, re.IGNORECASE)
+    if m_tech:
+        tech_val = m_tech.group(1).strip()
+    return {"os": os_val, "technology": tech_val}
+
+
+def _extract_errors(output: str) -> List[str]:
+    errs = []
+    for m in re.finditer(r"\[(CRITICAL|ERROR|WARNING)\]\s*(.+)", output, re.IGNORECASE):
+        level = m.group(1).upper()
+        msg = m.group(2).strip()
+        errs.append(f"[{level}] {msg}")
+    return errs
+
+
+def parse_sqlmap_output(output: str, url: str) -> Dict:
     parsed = {
         "target": {
             "os": None,
@@ -8,46 +97,25 @@ def parse_sqlmap_output(output: str, url: str) -> dict:
             "dbms": None,
             "url": url
         },
+        "injection_points": [],
         "databases": [],
-        "vulnerabilities": {
-            "boolean_based": None,
-            "error_based": None,
-            "time_based": None,
-            "union_based": None
-        },
+        "errors": [],
         "raw_output": output
     }
 
-    # ------------------------------- OS -------------------------------
-    os_match = re.search(r"web server operating system: ([^\n]+)", output)
-    if os_match:
-        parsed["target"]["os"] = os_match.group(1).strip()
+    # DBMS, OS, technology
+    parsed["target"]["dbms"] = _extract_dbms(output)
+    meta = _extract_os_and_tech(output)
+    parsed["target"]["os"] = meta.get("os")
+    parsed["target"]["technology"] = meta.get("technology")
 
-    # ------------------------------- TECHNOLOGY -------------------------------
-    tech_match = re.search(r"web application technology: ([^\n]+)", output)
-    if tech_match:
-        parsed["target"]["technology"] = tech_match.group(1).strip()
+    # injection points
+    parsed["injection_points"] = _extract_injection_points(output)
 
-    # ------------------------------- DBMS -------------------------------
-    dbms_match = re.search(r"back-end DBMS is ([^\n]+)", output)
-    if dbms_match:
-        parsed["target"]["dbms"] = dbms_match.group(1).strip()
+    # databases
+    parsed["databases"] = _extract_databases(output)
 
-    # ------------------------------- DATABASES -------------------------------
-    db_matches = re.findall(r"\[\*\] (.+)", output)
-    parsed["databases"] = db_matches or []
-
-    # ------------------------------- VULNERABILIDADES -------------------------------
-    vuln_patterns = {
-        "boolean_based": r"Type: boolean-based blind[\s\S]*?Payload: (.+)",
-        "error_based":   r"Type: error-based[\s\S]*?Payload: (.+)",
-        "time_based":    r"Type: time-based blind[\s\S]*?Payload: (.+)",
-        "union_based":   r"Type: UNION query[\s\S]*?Payload: (.+)"
-    }
-
-    for key, pattern in vuln_patterns.items():
-        match = re.search(pattern, output)
-        if match:
-            parsed["vulnerabilities"][key] = match.group(1).strip()
+    # errors/warnings
+    parsed["errors"] = _extract_errors(output)
 
     return parsed

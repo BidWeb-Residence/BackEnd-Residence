@@ -1,12 +1,11 @@
+# main.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pathlib import Path
 
 from core.validators import is_valid_url
 from core.runner import run_sqlmap
-from pathlib import Path
-
-SQLMAP_SCRIPT = Path(__file__).parent / "sqlmap" / "runner.py"
 
 app = FastAPI(
     title="SQL Injection API",
@@ -15,7 +14,6 @@ app = FastAPI(
 
 class ScanRequest(BaseModel):
     url: str
-
 
 # CORS
 app.add_middleware(
@@ -30,36 +28,40 @@ app.add_middleware(
 async def welcome_api():
     return {"message": "Welcome to SQL Injection Tester"}
 
-
 @app.post("/scan/sql")
 async def scan_url(data: ScanRequest):
     url = data.url
 
     # validação
     if not is_valid_url(url):
-        raise HTTPException(400, detail="URL inválida")
+        raise HTTPException(status_code=400, detail="URL inválida")
 
     result = run_sqlmap(url)
 
-    # verifica erro no sqlmap
-    if result["returncode"] != 0:
+    # verifica erro no sqlmap (se precisar diferenciar)
+    if result.get("returncode", 1) != 0:
+        # encaminha stderr para diagnosticar, mas ainda retorna parsed se existir
+        parsed = result.get("parsed", {})
         raise HTTPException(
-            500,
+            status_code=500,
             detail={
                 "message": "Falha ao executar sqlmap",
-                "stderr": result["stderr"],
-                "stdout": result["stdout"]
+                "stderr": result.get("stderr"),
+                "stdout": result.get("stdout"),
+                "parsed": parsed
             }
         )
 
-    # retorno para o frontend
+    parsed = result.get("parsed", {})
+
     return {
-    "status": "success",
-    "target_url": url,
-    "data": {
-    "dbms": result.get("dbms"),
-    "injection_points": result.get("injection_points", []),
-    "databases": result.get("databases", [])
-    
-}
+        "status": "success",
+        "target_url": url,
+        "data": {
+            "target": parsed.get("target", {}),
+            "dbms": parsed.get("target", {}).get("dbms"),
+            "injection_points": parsed.get("injection_points", []),
+            "databases": parsed.get("databases", []),
+            "errors": parsed.get("errors", [])
+        }
     }
