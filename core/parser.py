@@ -1,17 +1,18 @@
-# core/parser.py
 import re
 from typing import Dict, List
 
 
 def _extract_injection_points(output: str) -> List[Dict]:
- 
+  
+    # Extrai pontos de injeção usando regex
     findings = []
-    
+    # Padrão para capturar tipo, título e payload
     pattern = re.compile(
         r"Type:\s*(.+?)\s*\n\s*Title:\s*(.+?)\s*\n\s*Payload:\s*(.+?)(?=\n\s*\n|\n---|\Z)",
         re.IGNORECASE | re.DOTALL,
     )
-
+    
+    # Itera sobre todas as correspondências encontradas
     for m in pattern.finditer(output):
         t = m.group(1).strip()
         title = m.group(2).strip()
@@ -21,9 +22,9 @@ def _extract_injection_points(output: str) -> List[Dict]:
 
 
 def _extract_databases(output: str) -> List[str]:
-
-    dbs = []
     
+    dbs = []
+    # Tenta extrair o bloco "available databases"
     block_match = re.search(r"available databases\s*\[\d+\]:\s*(.*?)(?:\n\n|\Z)", output, re.IGNORECASE | re.DOTALL)
     if block_match:
         block = block_match.group(1)
@@ -35,11 +36,13 @@ def _extract_databases(output: str) -> List[str]:
                 if not re.match(r"(starting|ending|fetched data)", name, re.IGNORECASE):
                     dbs.append(name)
     else:
+        
         # Fallback: pega todas as linhas [*] <nome> e filtra
         all_matches = re.findall(r"\[\*\]\s*([A-Za-z0-9_\-]+)", output)
         for name in all_matches:
             if not re.match(r"(starting|ending|fetched|your sqlmap version)", name, re.IGNORECASE):
                 dbs.append(name)
+                
     # remove duplicados mantendo ordem
     seen = set()
     res = []
@@ -51,9 +54,11 @@ def _extract_databases(output: str) -> List[str]:
 
 
 def _extract_dbms(output: str) -> str:
+    # procura "back-end DBMS: <name>"
     m = re.search(r"back-end DBMS[:\s]*([^\n]+)", output, re.IGNORECASE)
     if m:
         return m.group(1).strip()
+    
     # fallback: procurar "the back-end DBMS is <name>"
     m2 = re.search(r"the back-end DBMS is\s*([^\n]+)", output, re.IGNORECASE)
     if m2:
@@ -75,6 +80,7 @@ def _extract_os_and_tech(output: str) -> Dict[str, str]:
 
 def _extract_errors(output: str) -> List[str]:
     errs = []
+    # Extrai linhas de erro/aviso/crítico
     for m in re.finditer(r"\[(CRITICAL|ERROR|WARNING)\]\s*(.+)", output, re.IGNORECASE):
         level = m.group(1).upper()
         msg = m.group(2).strip()
@@ -83,6 +89,7 @@ def _extract_errors(output: str) -> List[str]:
 
 
 def parse_sqlmap_output(output: str, url: str) -> Dict:
+    # Monta o dicionário
     parsed = {
         "target": {
             "os": None,

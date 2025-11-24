@@ -1,4 +1,3 @@
-# main.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -40,6 +39,7 @@ async def scan_url(data: ScanRequest):
 
     # verifica erro no sqlmap (se precisar diferenciar)
     if result.get("returncode", 1) != 0:
+        
         # encaminha stderr para diagnosticar, mas ainda retorna parsed se existir
         parsed = result.get("parsed", {})
         raise HTTPException(
@@ -54,6 +54,7 @@ async def scan_url(data: ScanRequest):
 
     parsed = result.get("parsed", {})
 
+#  Retorno front
     return {
         "status": "success",
         "target_url": url,
